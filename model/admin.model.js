@@ -1,0 +1,58 @@
+import pool from "../db/dbConfig.js";
+class Admin {
+    constructor(id, username, password) {
+        this.id = id;
+        this.username = username;
+        this.password = password;
+    }
+
+    signUp() {
+        return new Promise((resolve, reject) => {
+            pool.getConnection((err, con) => {
+                if (err)
+                    reject(err);
+                else {
+                    let sql = "insert into admin(username,password) values(?,?)";
+                    con.query(sql, [this.username, this.password], (err, result) => {
+                        err ? reject(err) : resolve(result);
+                    })
+                    con.release();
+                }
+            });
+        });
+    }
+    signIn() {
+        return new Promise((resolve, reject) => {
+            pool.getConnection((err, con) => {
+                if (err) {
+                    reject(err);
+                }
+                else {
+                    let sql = "select * from admin where username=? AND password=?";
+                    con.query(sql, [this.username, this.password], (err, result) => {
+                        err ? reject(err) : !result.length ? reject("n....") : resolve(result);
+                        con.release();
+                    });
+
+                }
+            })
+        })
+    }
+    Update() {
+        return new Promise((resolve, reject) => {
+            pool.getConnection((err, con) => {
+                if (err) {
+                    reject(err);
+                }
+                else {
+                    let sql = "update admin set username=?,password=? where admin_id=?"
+                    con.query(sql, [this.username, this.password, this.id], (err, result) => {
+                        err ? reject(err) : result.length == 0 ? reject(err) : resolve(result);
+                        con.release();
+                    });
+                }
+            });
+        });
+    }
+}
+export default Admin;
